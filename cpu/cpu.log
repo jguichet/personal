@@ -1,0 +1,3 @@
+[INFO] 16:37:04:754 CPU/(2519:2519): Hola,UTN el modulo CPU funciona con logs
+[INFO] 16:56:20:248 CPU/(5662:5662): Iniciando modulo CPU. Intentando conectar al Kernel Memory...
+[INFO] 16:56:20:257 CPU/(5662:5662): ¡Conexion EXITOSA al Kernel Memory!
