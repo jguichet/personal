@@ -10,24 +10,24 @@ int main(void) {
     t_log* logger = log_create("io.log", "IO", 1, LOG_LEVEL_INFO);
     log_info(logger, "Iniciando modulo IO...");
 
-    /* =========================================================================
-       PASO 1: Preparamos las estructuras para conectarnos al Scheduler 
-       (Sabemos que atiende en el Puerto 8001)
-       ========================================================================= */
+    
+    //Preparamos las estructuras para conectarnos al Scheduler 
+       //(Sabemos que esta seteado en el Puerto 8001)
+  
     struct addrinfo hints, *servinfo;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     getaddrinfo("127.0.0.1", "8001", &hints, &servinfo);
 
-    /* =========================================================================
-       PASO 2: Creamos el socket (nuestro telefono)
-       ========================================================================= */
+  
+    //Creamos el socket 
+       
     int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
 
-    /* =========================================================================
-       PASO 3: Intentamos la conexion (llamar)
-       ========================================================================= */
+   
+     //Intentamos la conexion 
+       
     int conexion = connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen);
     
     if (conexion != -1) {
