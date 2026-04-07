@@ -21,7 +21,7 @@ int main(void) {
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    getaddrinfo("127.0.0.1", "8000", &hints, &servinfo);
+    getaddrinfo("127.0.0.1", "8001", &hints, &servinfo);
 
     /* =========================================================================
        PASO 2: Crear el Socket (nuestro telefono)
@@ -35,7 +35,7 @@ int main(void) {
     
     // Verificamos si nos atendieron
     if (conexion != -1) {
-        log_info(logger, "¡Conexion EXITOSA al Kernel Memory!");
+        log_info(logger, "¡Conexion EXITOSA al Kernel Scheduler!");
     } else {
         log_error(logger, "Error al intentar conectar.");
     }
