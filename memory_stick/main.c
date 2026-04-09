@@ -12,27 +12,42 @@ int main(void) {
 
     struct addrinfo hints, *servinfo;
     memset(&hints, 0, sizeof(hints)); //limpieza de memoria
-    hints.ai_family = AF_UNSPEC;   //ponemos AF_UNSPEC ya que no importa si es IPv4 o IPv6
+    hints.ai_family = AF_INET;   //ponemos AF_INET para que sea IPv4
     hints.ai_socktype = SOCK_STREAM; //SOCK_STREAM porque queremos conexion TCP(flujo de datos confiable)
-    getaddrinfo("127.0.0.1", "8000", &hints, &servinfo); // Traduce la IP y puerto (texto) a un formato que la placa de red entienda y lo guarda en servinfo
+    // 1. Preparamos la dirección
+int err = getaddrinfo("127.0.0.1", "8000", &hints, &servinfo);
+if (err != 0) {
+    log_error(logger, "Error al preparar la direccion de red");
+    return EXIT_FAILURE; // Cortamos la ejecución
+}
+/* * ¿Por qué usar getaddrinfo?
+Lo usamos para traducir nuestra IP (en formato string "127.0.0.1") y el puerto 
+a las estructuras binarias y dinámicas que requiere el sistema operativo. 
+Además, nos ahorra armar las estructuras a mano,filtrando 
+explícitamente para usar el protocolo IPv4 (AF_INET).
+ */
+// 2. Creamos el socket
+int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+if (socket_cliente == -1) {
+    log_error(logger, "Error al crear el socket");
+    freeaddrinfo(servinfo); // Limpiamos la basura antes de salir
+    return EXIT_FAILURE;
+}
 
-    int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-    // Crea el socket ("el teléfono") usando la configuración guardada en servinfo
-    int conexion = connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen);
-    // Intenta establecer la conexión con el servidor (tocar el timbre en el puerto 8000)
+// 3. Intentamos conectar
+int conexion = connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen);
+if (conexion == -1) {
+    log_error(logger, "Error al conectar con el servidor");
+    freeaddrinfo(servinfo);
+    close(socket_cliente);
+    return EXIT_FAILURE;
+} else {
+    log_info(logger, "Conexion exitosa con el servidor!");
+}
 
-    
-    if (conexion != -1) {
-        log_info(logger, "## Conectado al Kernel Memory exitosamente!");
-    } else {
-        log_error(logger, "Error al conectar con Kernel Memory.");
-    }
-
-    freeaddrinfo(servinfo); 
+// Si llegó hasta acá, todo salió perfecto
+freeaddrinfo(servinfo); 
     close(socket_cliente); //cierra el canal de comunicacion
     log_destroy(logger);
     return 0;
 }
-//¿porque usar getaddrinfo?
-/*"Lo usamos para que el código sea independiente del protocolo. 
-No nos importa si es IPv4 o IPv6, la función se encarga de llenar la estructura servinfo con lo que necesite el sistema operativo".*/

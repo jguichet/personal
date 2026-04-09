@@ -12,20 +12,36 @@ int main(void) {
 
     struct addrinfo hints, *servinfo;
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    getaddrinfo("127.0.0.1", "8000", &hints, &servinfo);
+    // 1. Preparamos la dirección
+int err = getaddrinfo("127.0.0.1", "8000", &hints, &servinfo);
+if (err != 0) {
+    log_error(logger, "Error al preparar la direccion de red");
+    return EXIT_FAILURE; // Cortamos la ejecución
+}
 
-    int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-    int conexion = connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen);
-    
-    if (conexion != -1) {
-        log_info(logger, "## Conectado al Kernel Memory exitosamente!");
-    } else {
-        log_error(logger, "Error al conectar con Kernel Memory.");
-    }
+// 2. Creamos el socket
+int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+if (socket_cliente == -1) {
+    log_error(logger, "Error al crear el socket");
+    freeaddrinfo(servinfo); // Limpiamos la basura antes de salir
+    return EXIT_FAILURE;
+}
 
-    freeaddrinfo(servinfo); 
+// 3. Intentamos conectar
+int conexion = connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen);
+if (conexion == -1) {
+    log_error(logger, "Error al conectar con el servidor");
+    freeaddrinfo(servinfo);
+    close(socket_cliente);
+    return EXIT_FAILURE;
+} else {
+    log_info(logger, "Conexion exitosa con el servidor!");
+}
+
+// Si llegó hasta acá, todo salió perfecto
+freeaddrinfo(servinfo); 
     close(socket_cliente);
     log_destroy(logger);
     return 0;
